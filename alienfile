@@ -1,0 +1,50 @@
+use alienfile;
+
+use strict;
+use warnings;
+
+use Alien::Build::CommandSequence;
+
+share {
+	requires 'Net::SSLeay' => 0;
+	requires 'IO::Socket::SSL' => 0;
+
+	plugin Download => (
+		url => 'https://github.com/mjwybrow/adaptagrams/archive/master.zip',
+	);
+
+	plugin Extract => 'zip';
+
+	plugin 'Build::Autoconf';
+	build [
+		'%{make_path} cola/m4',
+		'autoreconf --install --verbose cola',
+		sub {
+			my ($build) = @_;
+
+			chdir 'cola';
+			Alien::Build::CommandSequence->new(
+				'%{configure}'
+			)->execute($build);
+			chdir '..';
+		},
+		'%{make} -C cola',
+		#'%{make} -C cola check',
+		'%{make} -C cola install',
+	];
+
+	gather sub {
+		my($build) = @_;
+		my $prefix = $build->runtime_prop->{prefix};
+
+		my @libs = qw(avoid cola dialect topology vpsc);
+
+		my $cflags = "-I$prefix/include";
+		my $libs = join " ", "-L$prefix/lib", (map { "-l$_" } @libs);
+
+		$build->runtime_prop->{cflags}        = $cflags;
+		$build->runtime_prop->{cflags_static} = $cflags;
+		$build->runtime_prop->{libs}          = $libs;
+		$build->runtime_prop->{libs_static}   = $libs;
+	};
+};
