@@ -3,6 +3,7 @@ use alienfile;
 use strict;
 use warnings;
 
+use File::Path qw(make_path);
 use Alien::Build::CommandSequence;
 
 share {
@@ -17,7 +18,10 @@ share {
 
 	plugin 'Build::Autoconf';
 	build [
-		'%{make_path} cola/m4',
+		sub {
+			my ($build) = @_;
+			make_path 'cola/m4';
+		},
 		'autoreconf --install --verbose cola',
 		sub {
 			my ($build) = @_;
