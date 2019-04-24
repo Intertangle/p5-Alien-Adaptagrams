@@ -25,6 +25,13 @@ share {
 			s{\QRectangle *r = rs\E}
 			{vpsc::Rectangle *r = rs}g;
 		});
+
+		if( exists $ENV{MSYSTEM} ) {
+			my $io = Path::Tiny->new('cola/libdialect/io.cpp');
+			$io->edit_lines(sub {
+				s{\Q#include <string>\E}{#include <cstring>\n$&}g;
+			});
+		}
 	};
 
 
