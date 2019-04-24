@@ -22,7 +22,7 @@ share {
 			my ($build) = @_;
 			make_path 'cola/m4';
 		},
-		'autoreconf --install --verbose cola',
+		q{sh -c 'autoreconf --install --verbose cola'},
 		sub {
 			my ($build) = @_;
 
