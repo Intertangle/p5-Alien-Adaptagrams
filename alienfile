@@ -16,6 +16,18 @@ share {
 
 	plugin Extract => 'zip';
 
+	patch sub {
+		my ($build) = @_;
+
+		my $colafd = Path::Tiny->new('cola/libcola/colafd.cpp');
+		$build->log("Patching $colafd");
+		$colafd->edit_lines(sub {
+			s{\QRectangle *r = rs\E}
+			{vpsc::Rectangle *r = rs}g;
+		});
+	};
+
+
 	plugin 'Build::Autoconf';
 	build [
 		sub {
