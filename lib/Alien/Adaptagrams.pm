@@ -38,7 +38,12 @@ sub Inline {
 			$params->{LIBS} =~ s/-l$_//g for @libs;
 		}
 
-		$params->{LIBS} = join " ", qw(:nosearch), $params->{LIBS}, qw(:search);
+		$params->{PRE_HEAD} = <<'		EOF';
+		#if defined(_MSC_VER) || defined(__MINGW32__)
+		#  define NO_XSLOCKS /* To avoid Perl wrappers of C library */
+		#endif
+		EOF
+
 
 		return $params;
 	}
