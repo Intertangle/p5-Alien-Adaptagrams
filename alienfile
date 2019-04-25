@@ -16,6 +16,48 @@ share {
 
 	plugin Extract => 'zip';
 
+	patch sub {
+		my ($build) = @_;
+
+		my $config_ac = Path::Tiny->new('cola/configure.ac');
+		$config_ac->edit_lines(sub {
+			s{^\QLT_INIT\E$}
+			{LT_INIT([win32-dll])}g;
+		});
+
+		my $test_mingw32 = <<'EOF';
+if test "x$host_os" = "xmingw32"; then
+  AM_LDFLAGS="$AM_LDFLAGS -no-undefined"
+fi
+EOF
+		my $replacement_mingw = <<'EOF';
+case "$host_os" in
+  mingw*)
+    AM_LDFLAGS="$AM_LDFLAGS -no-undefined"
+    ;;
+esac
+EOF
+		$config_ac->edit(sub {
+			s{\Q$test_mingw32\E}
+			{$replacement_mingw}sg;
+		});
+
+		my $colafd = Path::Tiny->new('cola/libcola/colafd.cpp');
+		$build->log("Patching $colafd");
+		$colafd->edit_lines(sub {
+			s{\QRectangle *r = rs\E}
+			{vpsc::Rectangle *r = rs}g;
+		});
+
+		if( exists $ENV{MSYSTEM} ) {
+			my $io = Path::Tiny->new('cola/libdialect/io.cpp');
+			$io->edit_lines(sub {
+				s{\Q#include <string>\E}{#include <cstring>\n$&}g;
+			});
+		}
+	};
+
+
 	plugin 'Build::Autoconf';
 	build [
 		sub {
