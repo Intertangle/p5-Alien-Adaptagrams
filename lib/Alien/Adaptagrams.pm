@@ -60,4 +60,4 @@ This module supports L<Inline's with functionality|Inline/"Playing 'with' Others
 
 L<Adaptagrams|http://www.adaptagrams.org/>
 
-L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Alien-Adaptagrams/>
+
